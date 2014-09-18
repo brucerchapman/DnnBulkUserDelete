@@ -5,3 +5,14 @@ C:\DotNetNuke\Codeplex2\dnnbulkuserdelete\Dnn.BulkUserDelete\Dnn.BulkUserDelete\
 C:\DotNetNuke\Codeplex2\dnnbulkuserdelete\Dnn.BulkUserDelete\Dnn.BulkUserDelete\bin\Debug\Microsoft.ApplicationBlocks.Data.dll
 C:\DotNetNuke\Codeplex2\dnnbulkuserdelete\Dnn.BulkUserDelete\Dnn.BulkUserDelete\bin\Debug\Newtonsoft.Json.dll
 C:\DotNetNuke\Codeplex2\dnnbulkuserdelete\Dnn.BulkUserDelete\Dnn.BulkUserDelete\obj\Debug\Dnn.BulkUserDelete.csprojResolveAssemblyReference.cache
+C:\Dev\DnnBulkUserDelete\Dnn.BulkUserDelete\bin\Debug\Dnn.BulkUserDelete.dll
+C:\Dev\DnnBulkUserDelete\Dnn.BulkUserDelete\bin\Debug\Dnn.BulkUserDelete.pdb
+C:\Dev\DnnBulkUserDelete\Dnn.BulkUserDelete\bin\Debug\Microsoft.ApplicationBlocks.Data.dll
+C:\Dev\DnnBulkUserDelete\Dnn.BulkUserDelete\bin\Debug\Newtonsoft.Json.dll
+C:\Dev\DnnBulkUserDelete\Dnn.BulkUserDelete\obj\Debug\Dnn.BulkUserDelete.csprojResolveAssemblyReference.cache
+C:\Dev\DnnBulkUserDelete\Dnn.BulkUserDelete\obj\Debug\Dnn.BulkUserDelete.dll
+C:\Dev\DnnBulkUserDelete\Dnn.BulkUserDelete\obj\Debug\Dnn.BulkUserDelete.pdb
+C:\Dev\DnnBulkUserDelete\Dnn.BulkUserDelete\bin\Debug\DotNetNuke.dll
+C:\Dev\DnnBulkUserDelete\Dnn.BulkUserDelete\bin\Debug\DotNetNuke.Web.dll
+C:\Dev\DnnBulkUserDelete\Dnn.BulkUserDelete\bin\Debug\System.Web.Http.WebHost.dll
+C:\Dev\DnnBulkUserDelete\Dnn.BulkUserDelete\bin\Debug\System.Web.Http.WebHost.xml

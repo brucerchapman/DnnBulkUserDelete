@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30723.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dnn.BulkUserDelete", "Dnn.BulkUserDelete\Dnn.BulkUserDelete.csproj", "{7AA31E98-42F9-478F-B6C2-E642EBB9EE6D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dnn.BulkUserDelete.Console", "Dnn.BulkUserDelete.Console\Dnn.BulkUserDelete.Console.csproj", "{70C3DFC9-EB58-49F8-86DD-BB5ACD371CD5}"
@@ -9,6 +11,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		deployToTestSite.bat = deployToTestSite.bat
 		packageForInstall.bat = packageForInstall.bat
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Assemblies", "Assemblies", "{557CE1AF-DC84-456A-A15D-71EF22D5C09B}"
+	ProjectSection(SolutionItems) = preProject
+		Assemblies\DotNetNuke.dll = Assemblies\DotNetNuke.dll
+		Assemblies\DotNetNuke.Web.dll = Assemblies\DotNetNuke.Web.dll
+		Assemblies\Microsoft.ApplicationBlocks.Data.dll = Assemblies\Microsoft.ApplicationBlocks.Data.dll
+		Assemblies\Newtonsoft.Json.dll = Assemblies\Newtonsoft.Json.dll
 	EndProjectSection
 EndProject
 Global
