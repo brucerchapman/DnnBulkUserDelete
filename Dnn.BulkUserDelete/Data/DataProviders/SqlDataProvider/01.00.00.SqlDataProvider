@@ -1,0 +1,84 @@
+﻿/************************************************************/
+/*****              SqlDataProvider                     *****/
+/*****                                                  *****/
+/*****                                                  *****/
+/***** Note: To manually execute this script you must   *****/
+/*****       perform a search and replace operation     *****/
+/*****       for {databaseOwner} and {objectQualifier}  *****/
+/*****                                                  *****/
+/************************************************************/
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'{databaseOwner}[{objectQualifier}bud_GetDeletedUsers]') AND type in (N'P', N'PC'))
+DROP PROCEDURE {databaseOwner}[{objectQualifier}bud_GetDeletedUsers]
+GO
+
+CREATE PROCEDURE {databaseOwner}[{objectQualifier}bud_GetDeletedUsers]
+  @portalId int 
+AS
+BEGIN
+    /* first result - total deleted user count */
+	select Count(distinct username) 
+	from {databaseOwner}{objectQualifier}Users u 
+	inner join {databaseOwner}{objectQualifier}UserPortals pu 
+	  on u.UserId = pu.UserId 
+    where pu.IsDeleted = 1 
+	  and pu.PortalId = @portalId
+	
+	/* next result, first 10 users */
+    select top 10 u.UserId, UserName 
+	from {databaseOwner}{objectQualifier}Users u 
+	inner join {databaseOwner}{objectQualifier}UserPortals pu 
+	  on u.UserId = pu.UserId 
+	where pu.IsDeleted = 1 
+	  and pu.PortalId = @portalId
+	order by u.UserId Asc
+
+	/* next result, last 10 users */
+	select top 10 u.UserId, UserName 
+	from {databaseOwner}{objectQualifier}Users u 
+	inner join {databaseOwner}{objectQualifier}UserPortals pu 
+	  on u.UserId = pu.UserId 
+	where pu.IsDeleted = 1 
+	  and pu.PortalId = @portalId
+	order by u.UserId Desc
+
+
+
+END
+GO
+
+
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'{databaseOwner}[{objectQualifier}bud_FindNextUsersToDelete]') AND type in (N'P', N'PC'))
+DROP PROCEDURE {databaseOwner}[{objectQualifier}bud_FindNextUsersToDelete]
+GO
+
+CREATE PROCEDURE {databaseOwner}[{objectQualifier}bud_FindNextUsersToDelete]
+  @portalId int , @numberOfUsers int
+AS
+BEGIN
+
+	/* find the next soft-deleted user in this portal*/
+	set rowcount @numberOfUsers
+	select u.UserId, UserName 
+	from {databaseOwner}{objectQualifier}Users u 
+	inner join {databaseOwner}{objectQualifier}UserPortals pu 
+	  on u.UserId = pu.UserId 
+	where pu.IsDeleted = 1 
+	  and pu.PortalId = @portalId
+	order by u.UserId Asc
+
+	set rowcount 0
+	/* total users to delete*/
+	select Count(distinct username) 
+	from {databaseOwner}{objectQualifier}Users u 
+	inner join {databaseOwner}{objectQualifier}UserPortals pu 
+	  on u.UserId = pu.UserId 
+    where pu.IsDeleted = 1 
+	  and pu.PortalId = @portalId
+END
+GO
+
+/************************************************************/
+/*****              SqlDataProvider                     *****/
+/************************************************************/

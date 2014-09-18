@@ -1,0 +1,77 @@
+﻿<dotnetnuke type="Package" version="5.0">
+  <packages>
+    <package name="Dnn.BulkUserDelete" type="Library" version="01.00.00">
+      <friendlyName>DNN Bulk User Delete</friendlyName>
+      <description>The DNN Bulk User Delete module is the back end for the Bulk User Deletion console.</description>
+      <owner>
+        <name></name>
+        <organization>DNN Corp</organization>
+        <url><![CDATA[<a href="#" target="_new">Dnn Bulk User Delete Codeplex Project</a>]]></url>
+        <email><![CDATA[Click here to raise issues or bugs, or to join the project<a href="#" target="_new"> via the issues and discussion pages</a>]]></email>
+      </owner>
+      <license src="EULA.html" />
+      <releaseNotes >
+        <![CDATA[
+            <p style="font-weight:bolder">Version 01.00.00 -  14 September 2014</p>
+            <p>The DNN Bulk User Delete extension is the back end for the Bulk User Delete Console Program.  This allows an authenticated admin to run a large user deletion program to remove unwanted users
+            from a DNN Portal.  This is done in small batches to prevent excessive load on the server.</p>
+            <p>
+              <ul>
+              <li>Initial Release</li>
+              </ul>
+              You must install this Extension before using the Dnn Bulk User Delete console.
+            </p>
+            
+          ]]>
+      </releaseNotes>
+      <dependencies>
+        <!-- uncomment and change for dependency on your module being installed -->
+          <dependency type="CoreVersion">07.01.00</dependency>
+      </dependencies>
+      <azureCompatible>true</azureCompatible>
+      <components>
+        <component type="Script">
+          <scripts>
+            <basePath>DesktopModules\Dnn_BulkUserDelete\SqlDataProvider</basePath>
+            <script type="Install">
+              <name>01.00.00.SqlDataProvider</name>
+              <version>01.00.00</version>
+            </script>
+            <script type="Uninstall">
+              <name>Uninstall.SqlDataProvider</name>
+              <version>01.00.00</version>
+            </script>
+          </scripts>
+        </component>
+<!--        <component type="UrlProvider">
+          <urlProvider>
+            <name>DNN Url Redirect Extension Provider</name>
+            <type>DNN.Modules.UrlRedirectProvider.UrlRedirectProvider</type>
+            <settingsControlSrc>DesktopModules/Dnn_BulkUserDelete/Settings.ascx</settingsControlSrc>
+            <redirectAllUrls>true</redirectAllUrls>
+            <replaceAllUrls>false</replaceAllUrls>
+            <rewriteAllUrls>false</rewriteAllUrls>
+            <desktopModule></desktopModule>
+          </urlProvider>
+        </component>-->        
+        <component type="Assembly">
+          <assemblies>
+            <assembly>
+              <path>bin</path>
+              <name>Dnn.BulkUserDelete.dll</name>
+              <sourceFileName>Dnn.BulkUserDelete.dll</sourceFileName>
+            </assembly>
+          </assemblies>
+        </component>
+        <!--<component type="ResourceFile">
+          <resourceFiles>
+            <basePath>DesktopModules\Dnn_BulkUserDelete</basePath>
+            <resourceFile>
+              <name>Dnn.BulkUserDelete_Resources.zip</name>
+            </resourceFile>
+          </resourceFiles>
+        </component>-->
+      </components>
+    </package>
+  </packages>
+</dotnetnuke>
