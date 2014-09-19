@@ -139,12 +139,19 @@ namespace Dnn.Modules.BulkUserDelete
             }
             return Request.CreateResponse(HttpStatusCode.OK, result);
         }
+        /// <summary>
+        /// Public service call to hard delete a batch of users
+        /// </summary>
+        /// <param name="requestJson">JSON request including the number of users to delete</param>
+        /// <remarks>Note : only deletes those users already 'soft' deleted (marked 'isDeleted')</remarks>
+        /// <returns></returns>
         [HttpPost]
 #if (DEBUG)
         [AllowAnonymous]
 #else
         [DnnAuthorize(StaticRoles="Administrators")]
 #endif
+        
         public HttpResponseMessage HardDeleteNextUsers(Newtonsoft.Json.Linq.JObject requestJson)
         {
             UserResult result = new UserResult();
@@ -159,9 +166,11 @@ namespace Dnn.Modules.BulkUserDelete
                 if (this.PortalSettings == null) throw new ArgumentNullException("PortalSettings object");
                 int portalId = this.PortalSettings.PortalId;
                 string message = null; int deletedUserCount = -1; int remainingUsersCount = -1; List<string> elapsedTimes;
+                //call the method which actually performs the batch delete
                 result.Success = UserDeleteController.HardDeleteUsers(testRun, actionNumber, portalId, useFastDelete, out deletedUserCount, out remainingUsersCount, out message, out elapsedTimes);
                 result.Message = message;
 #if (DEBUG)
+                //in debug mode, output an array of call times
                 result.ElapsedTimes = elapsedTimes.ToArray();
 #endif
                 if (result.Success)
@@ -194,11 +203,25 @@ namespace Dnn.Modules.BulkUserDelete
     #region private user deletion routines
     internal static class UserDeleteController
     {
+        /// <summary>
+        /// This method performs the deletion of batches of users by finding the next n users from the database, finding their user folders, and removing the user and the folder.
+        /// </summary>
+        /// <param name="testRun">if true, doesn't commit any changes</param>
+        /// <param name="actionNumber">size of the batch to process (number of users to delete in one go)</param>
+        /// <param name="fromPortalId">portalId for users</param>
+        /// <param name="useFastDelete">Fast delete uses a direct delete of the folder record and the folder.  Only works if on the local file system.  If on folder providers, the delete must go through the FolderManager call, which is slower.</param>
+        /// <param name="deletedUserCount">out parameter indicating how many users deleted</param>
+        /// <param name="remainingUsersCount">out parameter indicating how many soft deleted users remain in this portal</param>
+        /// <param name="message">Information message about what happened in the call</param>
+        /// <param name="ets">Array of strings detailing the speed of the function calls</param>
+        /// <returns></returns>
         internal static bool HardDeleteUsers(bool testRun, int actionNumber, int fromPortalId, bool useFastDelete, out int deletedUserCount, out int remainingUsersCount, out string message, out List<string> ets)
         {
             bool result = false;
             message = ""; deletedUserCount = 0; remainingUsersCount = -1;
             ets = new List<string>(); DateTime before;
+
+            //get the user that is calling this service for updating records
             UserInfo callingUser = DotNetNuke.Entities.Users.UserController.GetCurrentUserInfo();
             int callingUserId = -1;
             if (callingUser != null)
@@ -207,8 +230,8 @@ namespace Dnn.Modules.BulkUserDelete
             IDataReader reader = null;
             try
             {
-                //this call mimics what happens in the aspnet membership provider for deleting and removing users, but does it independent of that code
                 before = DateTime.Now;
+                //open a reader fo the next users to delete
                 reader = Data.DataProvider.Instance().FindNextUsersToDelete(fromPortalId, actionNumber);
                 SnapshotEt("FindNextUsersToDelete", ref ets, before);
                 while (reader.Read())
