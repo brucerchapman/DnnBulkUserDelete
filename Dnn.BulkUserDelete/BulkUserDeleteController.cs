@@ -203,12 +203,11 @@ namespace Dnn.Modules.BulkUserDelete
     #region private user deletion routines
     internal static class UserDeleteController
     {
-        /// <summary>
-        /// This method performs the deletion of batches of users by finding the next n users from the database, finding their user folders, and removing the user and the folder.
-        /// </summary>
-        /// <param name="testRun">if true, doesn't commit any changes</param>
-        /// <param name="actionNumber">size of the batch to process (number of users to delete in one go)</param>
-        /// <param name="fromPortalId">portalId for users</param>
+        class UserToDelete
+        {
+            public int UserId { get; set; }
+            public string Username { get; set; }
+        }
         /// <param name="useFastDelete">Fast delete uses a direct delete of the folder record and the folder.  Only works if on the local file system.  If on folder providers, the delete must go through the FolderManager call, which is slower.</param>
         /// <param name="deletedUserCount">out parameter indicating how many users deleted</param>
         /// <param name="remainingUsersCount">out parameter indicating how many soft deleted users remain in this portal</param>
@@ -220,30 +219,51 @@ namespace Dnn.Modules.BulkUserDelete
             bool result = false;
             message = ""; deletedUserCount = 0; remainingUsersCount = -1;
             ets = new List<string>(); DateTime before;
-
+            string userNameDeleting = null; int userDeleting = -1;
             //get the user that is calling this service for updating records
-            UserInfo callingUser = DotNetNuke.Entities.Users.UserController.GetCurrentUserInfo();
+            var callingUser = UserController.GetCurrentUserInfo();
             int callingUserId = -1;
             if (callingUser != null)
                 callingUserId = callingUser.UserID;
-                                    
+
             IDataReader reader = null;
             try
             {
+                var usersList = new List<UserToDelete>();
                 before = DateTime.Now;
                 //open a reader fo the next users to delete
-                reader = Data.DataProvider.Instance().FindNextUsersToDelete(fromPortalId, actionNumber);
-                SnapshotEt("FindNextUsersToDelete", ref ets, before);
-                while (reader.Read())
+                using (reader = Data.DataProvider.Instance().FindNextUsersToDelete(fromPortalId, actionNumber))
                 {
-                    //someone to delete
-                    int toDeleteUserId = (int)reader["UserId"];
-                    string toDeleteUserName = (string)reader["Username"];
-                    message += "Deleting User ID [" + toDeleteUserId.ToString() + "] ; Username [" + toDeleteUserName + "]" ;
+                    while (reader.Read())
+                    {
+                        usersList.Add(new UserToDelete { UserId = (int)reader["UserId"], Username = (string)reader["Username"] });
+
+                    }
+                    if (reader.NextResult())
+                    {
+                        if (reader.Read())
+                        {
+                            /* get count of remaining users */
+                            /* note this raw count is taken before the delete */
+                            remainingUsersCount = (int)reader[0];
+                            remainingUsersCount = remainingUsersCount - deletedUserCount;
+                        }
+                    }
+                }
+                //keep a snapshot of how long that took
+                SnapshotEt("FindNextUsersToDelete", ref ets, before);
+
+                //iterate the list of users to delete
+                foreach (var toDeleteUser in usersList)
+                {
+                    message += "Deleting User ID [" + toDeleteUser.UserId.ToString() + "] ; Username [" + toDeleteUser.Username + "]";
+                    //keep these values in case of error, helps to track down user-specific issues
+                    userNameDeleting = toDeleteUser.Username;
+                    userDeleting = toDeleteUser.UserId;
                     //find the user
                     before = DateTime.Now;
-                    UserInfo user = UserController.GetUser(fromPortalId, toDeleteUserId, true);
-                    SnapshotEt("GetUser [" + toDeleteUserId.ToString() + "]", ref ets, before);
+                    UserInfo user = UserController.GetUser(fromPortalId, toDeleteUser.UserId, true);
+                    SnapshotEt("GetUser [" + toDeleteUser.UserId.ToString() + "]", ref ets, before);
                     if (user != null) //check, maybe running on different threads, maybe already gone?
                     {
                         //get the folder path
@@ -260,7 +280,7 @@ namespace Dnn.Modules.BulkUserDelete
                             if (folder != null)
                             {
                                 before = DateTime.Now;
-                                if (!testRun && !useFastDelete)  
+                                if (!testRun && !useFastDelete)
                                 {
                                     //normal delete uses the folder manager to delete
                                     FolderManager.Instance.DeleteFolder(folder);
@@ -280,7 +300,7 @@ namespace Dnn.Modules.BulkUserDelete
                             before = DateTime.Now;
                             CleanUpParentPath(folderPath, fromPortalId, testRun, useFastDelete, ref message);
                             SnapshotEt("CleanUpParentPath", ref ets, before);
-                            
+
                         }
 
                         //calling AspNetMembershipProvider.cs/RemoveUser
@@ -291,20 +311,16 @@ namespace Dnn.Modules.BulkUserDelete
                         SnapshotEt("RemoveUser [" + user.UserID + "]", ref ets, before);
                         if (removeOK)
                         {
+                            //call the membership delete user as well, to completely remove hte user from the site
+                            if (!testRun)
+                                removeOK = DotNetNuke.Security.Membership.AspNetMembershipProvider.Instance().DeleteUser(user);
+                        }
+                        if (removeOK)
+                        {
                             //user is gone from the database
                             deletedUserCount++;
                         }
                         result = true;
-                    }
-                }
-                if (reader.NextResult())
-                {
-                    if (reader.Read())
-                    {
-                        /* get count of remaining users */
-                        /* note this raw count is taken before the delete */
-                        remainingUsersCount = (int)reader[0];
-                        remainingUsersCount = remainingUsersCount - deletedUserCount;
                     }
                 }
 
@@ -315,12 +331,14 @@ namespace Dnn.Modules.BulkUserDelete
             }
             catch (Exception ex)
             {
-                message = ex.Message;
+                if (userNameDeleting != null)
+                    message += "Failed while deleting username [" + userNameDeleting + "], userId [" + userDeleting.ToString() + "]" + Environment.NewLine;
+                message += "Exception Message: " + ex.Message;
                 result = false;
             }
             finally
             {
-                if (reader != null)
+                if (reader != null && !reader.IsClosed)
                 {
                     reader.Close();
                     reader.Dispose();
@@ -328,9 +346,8 @@ namespace Dnn.Modules.BulkUserDelete
                 }
             }
             return result;
-
-
         }
+
         /// <summary>
         /// Provides a simplified folder deletion process that bypasses the folder provider code, doesn't refresh the cache and deletes using system.io
         /// </summary>
@@ -346,16 +363,28 @@ namespace Dnn.Modules.BulkUserDelete
             string folderPath = folder.FolderPath;
             if (string.IsNullOrEmpty(folderPath) == false)
             {
-                //directly delete db path
-                if (!isTestRun)
-                    DotNetNuke.Data.DataProvider.Instance().DeleteFolder(fromPortalId, PathUtils.Instance.FormatFolderPath(folder.FolderPath));
                 //directly delete folder
                 string actualFolderPath = PortalSettings.Current.HomeDirectoryMapPath + folder.FolderPath.Replace("/","\\");//get the physical path on the machine - assumes local storage and not folder provider
                 if (Directory.Exists(actualFolderPath))
                 {
+                    //check for files in the directory
+                    string[] files = Directory.GetFiles(actualFolderPath);
+                    if (files.Length > 0)
+                    {
+                        //has files in it, delete those too
+                        foreach (string filename in files)
+                        {
+                            if (!isTestRun)
+                                File.Delete(filename);
+                        }
+                    }
                     //yes, it's here, physically delete the folder
                     if (!isTestRun) Directory.Delete(actualFolderPath);
                 }
+
+                //directly delete db path
+                if (!isTestRun)
+                    DotNetNuke.Data.DataProvider.Instance().DeleteFolder(fromPortalId, PathUtils.Instance.FormatFolderPath(folder.FolderPath));
                 //update parent folder
                 var parentFolderPath = folderPath.Substring(0, folderPath.Substring(0, folderPath.Length - 1).LastIndexOf("/", StringComparison.Ordinal) + 1);
                 var pfldr = FolderManager.Instance.GetFolder(fromPortalId, parentFolderPath);
