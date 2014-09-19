@@ -18,6 +18,7 @@
             <p>
               <ul>
               <li>Initial Release</li>
+              <li>Allows bulk deletion of 'soft-deleted' users from a Dnn Portal</li>
               </ul>
               You must install this Extension before using the Dnn Bulk User Delete console.
             </p>
@@ -43,17 +44,6 @@
             </script>
           </scripts>
         </component>
-<!--        <component type="UrlProvider">
-          <urlProvider>
-            <name>DNN Url Redirect Extension Provider</name>
-            <type>DNN.Modules.UrlRedirectProvider.UrlRedirectProvider</type>
-            <settingsControlSrc>DesktopModules/Dnn_BulkUserDelete/Settings.ascx</settingsControlSrc>
-            <redirectAllUrls>true</redirectAllUrls>
-            <replaceAllUrls>false</replaceAllUrls>
-            <rewriteAllUrls>false</rewriteAllUrls>
-            <desktopModule></desktopModule>
-          </urlProvider>
-        </component>-->        
         <component type="Assembly">
           <assemblies>
             <assembly>
@@ -63,14 +53,6 @@
             </assembly>
           </assemblies>
         </component>
-        <!--<component type="ResourceFile">
-          <resourceFiles>
-            <basePath>DesktopModules\Dnn_BulkUserDelete</basePath>
-            <resourceFile>
-              <name>Dnn.BulkUserDelete_Resources.zip</name>
-            </resourceFile>
-          </resourceFiles>
-        </component>-->
       </components>
     </package>
   </packages>
