@@ -217,6 +217,7 @@ namespace Dnn.Modules.BulkUserDelete
         internal static bool HardDeleteUsers(bool testRun, int actionNumber, int fromPortalId, bool useFastDelete, out int deletedUserCount, out int remainingUsersCount, out string message, out List<string> ets)
         {
             bool result = false;
+            Exception foundEx = null;
             message = ""; deletedUserCount = 0; remainingUsersCount = -1;
             ets = new List<string>(); DateTime before;
             string userNameDeleting = null; int userDeleting = -1;
@@ -334,6 +335,7 @@ namespace Dnn.Modules.BulkUserDelete
                 if (userNameDeleting != null)
                     message += "Failed while deleting username [" + userNameDeleting + "], userId [" + userDeleting.ToString() + "]" + Environment.NewLine;
                 message += "Exception Message: " + ex.Message;
+                foundEx = ex;
                 result = false;
             }
             finally
@@ -345,6 +347,8 @@ namespace Dnn.Modules.BulkUserDelete
                     reader = null;
                 }
             }
+            if (foundEx != null)
+                throw foundEx;
             return result;
         }
 

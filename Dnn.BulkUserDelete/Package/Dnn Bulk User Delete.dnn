@@ -1,6 +1,6 @@
 ﻿<dotnetnuke type="Package" version="5.0">
   <packages>
-    <package name="Dnn.BulkUserDelete" type="Library" version="01.00.00">
+    <package name="Dnn.BulkUserDelete" type="Library" version="01.00.01">
       <friendlyName>DNN Bulk User Delete</friendlyName>
       <description>The DNN Bulk User Delete module is the back end for the Bulk User Deletion console.</description>
       <owner>
